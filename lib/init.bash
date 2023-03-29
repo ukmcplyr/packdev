@@ -72,6 +72,9 @@ then
   mkdir -m0700 "$PD_TMP_DIR" || die "$PD_TMP_DIR: mkdir failed"
 fi
 
+# Source in instance-local config
+[[ -f $PD_INSTANCE_DIR/.packdev.env ]] && source "$PD_INSTANCE_DIR/.packdev.env"
+
 ##
 # vim: ts=2 sw=2 et fdm=marker :
 ##

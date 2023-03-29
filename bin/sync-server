@@ -7,6 +7,11 @@ source "$(dirname "$(dirname "$0")")"/lib/config.bash
 [[ -z $SSH_USER ]] && die "Config variable SSH_USER not set in $PD_ROOT_DIR/config.bash"
 [[ -z $SSH_PATH ]] && die "Config variable SSH_PATH not set in $PD_ROOT_DIR/config.bash"
 
+echo "SSH_HOST: $SSH_HOST"
+echo "SSH_USER: $SSH_USER"
+echo "SSH_PATH: $SSH_PATH"
+exit 0
+
 MOD_DIRS=(
   'mods'
   'disabledmods'
