@@ -1,0 +1,43 @@
+#!/bin/bash
+
+source "$(dirname "$(dirname "$0")")"/lib/init.bash
+source "$(dirname "$(dirname "$0")")"/lib/config.bash
+
+[[ -z $SSH_HOST ]] && die "Config variable SSH_HOST not set in $PD_ROOT_DIR/config.bash"
+[[ -z $SSH_USER ]] && die "Config variable SSH_USER not set in $PD_ROOT_DIR/config.bash"
+[[ -z $SSH_PATH ]] && die "Config variable SSH_PATH not set in $PD_ROOT_DIR/config.bash"
+
+KUBEJS_DIRS=(
+  'assets'
+  'client_scripts'
+  'config'
+  'data'
+  'server_scripts'
+  'startup_scripts'
+)
+
+function die()
+{
+  echo >&2 "$(basename "$0"): error:" "$@"
+  exit 1
+}
+
+for dir in "${KUBEJS_DIRS[@]}"
+do
+  echo ">>> Syncing kubejs/$dir/"
+
+  [[ -d kubejs/$dir ]] || die "directory 'kubejs/$dir' doesn't exist"
+
+  rsync \
+    --quiet \
+    --archive \
+    --delete-after \
+    --progress \
+    -e ssh \
+    "kubejs/$dir/" \
+    "$SSH_USER@$SSH_HOST:$SSH_PATH/kubejs/$dir/"
+done
+
+##
+# vim: ts=2 sw=2 et fdm=marker :
+##

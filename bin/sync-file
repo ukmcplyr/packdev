@@ -1,0 +1,34 @@
+#!/bin/bash
+
+source "$(dirname "$(dirname "$0")")"/lib/init.bash
+source "$(dirname "$(dirname "$0")")"/lib/config.bash
+
+[[ -z $SSH_HOST ]] && die "Config variable SSH_HOST not set in $PD_ROOT_DIR/config.bash"
+[[ -z $SSH_USER ]] && die "Config variable SSH_USER not set in $PD_ROOT_DIR/config.bash"
+[[ -z $SSH_PATH ]] && die "Config variable SSH_PATH not set in $PD_ROOT_DIR/config.bash"
+
+function die()
+{
+  echo >&2 "$(basename "$0"): error:" "$@"
+  exit 1
+}
+
+if [[ $# -ne 1 ]]
+then
+  echo "Usage: $(basename "$0") <path>"
+  exit 1
+fi
+
+[[ -f $1 ]] || die "source '$1' does not exist"
+
+rsync \
+  --quiet \
+  --archive \
+  --progress \
+  -e ssh \
+  "$1" \
+  "$SSH_USER@$SSH_HOST:$SSH_PATH/$1"
+
+##
+# vim: ts=2 sw=2 et fdm=marker :
+##

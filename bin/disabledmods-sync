@@ -1,0 +1,22 @@
+#!/bin/bash
+
+source "$(dirname "$(dirname "$0")")"/lib/init.bash
+
+git status \
+  | grep 'deleted:.*disabledmods/' \
+  | sed 's,^.*deleted:.*disabledmods,disabledmods,g' \
+  > "$PD_TMP_DIR/mods.deleted"
+
+while read path
+do
+  git rm "$path"
+
+done < "$PD_TMP_DIR/mods.deleted"
+
+rm -f "$PD_TMP_DIR/mods.deleted"
+
+git add mods
+
+##
+# vim: ts=2 sw=2 et fdm=marker :
+##

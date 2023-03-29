@@ -1,0 +1,69 @@
+#!/bin/bash
+
+source "$(dirname "$(dirname "$0")")"/lib/init.bash
+source "$(dirname "$(dirname "$0")")"/lib/config.bash
+
+[[ -z $SSH_HOST ]] && die "Config variable SSH_HOST not set in $PD_ROOT_DIR/config.bash"
+[[ -z $SSH_USER ]] && die "Config variable SSH_USER not set in $PD_ROOT_DIR/config.bash"
+[[ -z $SSH_PATH ]] && die "Config variable SSH_PATH not set in $PD_ROOT_DIR/config.bash"
+
+MOD_DIRS=(
+  'mods'
+  'disabledmods'
+)
+
+function die()
+{
+  echo >&2 "$(basename "$0"): error:" "$@"
+  exit 1
+}
+
+rsync_file()
+{
+  [[ -f $1 ]] || die "file '$1' doesn't exist"
+
+  echo -e ">>> Syncing $1\n"
+
+  rsync \
+    --archive \
+    --progress \
+    -e ssh \
+    "$1" "$SSH_USER@$SSH_HOST:$SSH_PATH/" \
+    || die "rsync_file(): $1: rsync failed"
+
+  echo
+}
+
+rsync_dir()
+{
+  [[ -d $1 ]] || die "directory '$1' doesn't exist"
+
+  echo -e ">>> Syncing $1/\n"
+
+  rsync \
+    --archive \
+    --delete-after \
+    --progress \
+    -e ssh \
+    "$1/" \
+    "$SSH_USER@$SSH_HOST:$SSH_PATH/$1/" \
+    || die "rsync_dir(): $1: rsync failed"
+
+  echo
+}
+
+rsync_file mods.client
+
+rsync_dir .packdev
+rsync_dir config
+#rsync_dir defaultconfigs
+rsync_dir kubejs
+
+for dir in "${MOD_DIRS[@]}"
+do
+  rsync_dir "$dir"
+done
+
+##
+# vim: ts=2 sw=2 et fdm=marker :
+##

@@ -1,0 +1,55 @@
+#!/bin/bash
+
+NODE="$(type -P node)"
+
+function check_js()
+{
+  echo "Checking $1"
+
+  "$NODE" --check "$1" >/dev/null 2>&1
+  local st=$?
+
+  [[ $st -eq 0 ]] && return 0
+
+  local out=$("$NODE" --check "$1")
+  echo >&2 "$out"
+
+  return 1
+}
+
+function die()
+{
+  echo >&2 "$(basename "$0"): error:" "$@"
+  exit 1
+}
+
+function ignore()
+{
+  case "$1" in
+    config/solarflux/custom_panels.js)
+      return 0
+      ;;
+  esac
+
+  return 1
+}
+
+if [[ -n $CHECK_DIR ]]
+then
+  [[ -d $CHECK_DIR ]] || die "directory '$CHECK_DIR' doesn't exist"
+  cd "$CHECK_DIR" || die "$CHECK_DIR: chdir failed"
+fi
+
+find . -type f |sed 's,^\./,,g' |while read path
+do
+  case "$path" in
+    *.[Jj][Ss])
+      ignore "$path" && continue
+      check_js "$path" || die "syntax error(s) encountered"
+      ;;
+  esac
+done
+
+##
+# vim: ts=2 sw=2 et fdm=marker :
+##
